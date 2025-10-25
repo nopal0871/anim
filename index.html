@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Anime Stream</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo">AnimeStream</div>
+            <nav>
+                <ul>
+                    <li><a href="#" id="navHome" class="active">Home</a></li>
+                    <li><a href="#" id="navSchedule">Jadwal Rilis</a></li>
+                    <li><a href="#" id="navComplete">Tamat</a></li>
+                    <li><a href="#" id="navOngoing">Sedang Tayang</a></li>
+                    <li><a href="#" id="navGenre">Genre</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        <!-- Search Bar -->
+        <div class="search-bar">
+            <input type="text" id="searchInput" class="search-input" placeholder="Cari anime...">
+            <button id="searchBtn" class="search-btn">Cari</button>
+        </div>
+
+        <!-- Content Sections -->
+        <div id="homeSection">
+            <h2 class="section-title">Sedang Tayang</h2>
+            <div id="ongoingAnime" class="anime-grid"></div>
+        </div>
+
+        <div id="scheduleSection" style="display: none;">
+            <h2 class="section-title">Jadwal Rilis</h2>
+            <div id="scheduleAnime" class="anime-grid"></div>
+        </div>
+
+        <div id="completeSection" style="display: none;">
+            <h2 class="section-title">Anime Tamat</h2>
+            <div id="completeAnime" class="anime-grid"></div>
+            <div id="completePagination" class="pagination"></div>
+        </div>
+
+        <div id="ongoingSection" style="display: none;">
+            <h2 class="section-title">Anime Sedang Tayang</h2>
+            <div id="ongoingList" class="anime-grid"></div>
+            <div id="ongoingPagination" class="pagination"></div>
+        </div>
+
+        <div id="genreSection" style="display: none;">
+            <h2 class="section-title">Daftar Genre</h2>
+            <div id="genreList" class="anime-grid"></div>
+        </div>
+
+        <div id="genreAnimeSection" style="display: none;">
+            <h2 class="section-title" id="genreTitle">Anime Berdasarkan Genre</h2>
+            <div id="genreAnime" class="anime-grid"></div>
+            <div id="genrePagination" class="pagination"></div>
+        </div>
+
+        <!-- Anime Detail Section -->
+        <div id="detailSection" style="display: none;">
+            <div class="detail-header">
+                <h2 class="section-title">Detail Anime</h2>
+                <button id="backToHome" class="control-btn">Kembali</button>
+            </div>
+            <div class="anime-detail-container">
+                <img id="detailPoster" class="detail-poster" src="" alt="Poster">
+                <div class="detail-info">
+                    <h3 id="detailTitle">Judul Anime</h3>
+                    <div class="detail-meta">
+                        <span id="detailType">TV</span> • 
+                        <span id="detailStatus">Ongoing</span> • 
+                        <span id="detailRating">⭐ 0.0</span>
+                    </div>
+                    <p id="detailSynopsis">Sinopsis akan muncul di sini...</p>
+                </div>
+            </div>
+            <div class="episode-list-section">
+                <h3>Daftar Episode</h3>
+                <div id="episodeList" class="episode-list"></div>
+            </div>
+            <div class="recommendation-section">
+                <h3>Rekomendasi</h3>
+                <div id="recommendations" class="anime-grid"></div>
+            </div>
+        </div>
+
+        <!-- Player Section -->
+        <div id="playerSection" style="display: none;">
+            <div class="player-header">
+                <h3 class="player-title" id="playerTitle">Judul Episode</h3>
+                <button id="closePlayer" class="control-btn">Tutup</button>
+            </div>
+            <div class="player-controls">
+                <button id="skipBack" class="control-btn"><< Skip 10s</button>
+                <button id="skipForward" class="control-btn">Skip 10s >></button>
+            </div>
+            <video id="videoPlayer" class="video-player" controls>
+                <source src="" type="video/mp4">
+                Browser Anda tidak mendukung elemen video.
+            </video>
+        </div>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
