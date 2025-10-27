@@ -208,6 +208,33 @@ function renderPagination(container, page, total, cb) {
     }
 }
 
+function addResolutionSelector(container, mp4Urls) {
+    const resDiv = document.createElement('div');
+    resDiv.style.marginTop = '10px';
+    resDiv.style.display = 'flex';
+    resDiv.style.gap = '8px';
+    resDiv.style.flexWrap = 'wrap';
+
+    mp4Urls.forEach(item => {
+        const btn = document.createElement('button');
+        btn.className = 'control-btn';
+        btn.textContent = item.resolution;
+        btn.style.fontSize = '0.9rem';
+        btn.style.padding = '6px 10px';
+        btn.onclick = () => {
+            videoPlayer.pause();
+            videoPlayer.src = item.url;
+            videoPlayer.load();
+            // Opsional: tandai resolusi aktif
+            const allBtns = resDiv.querySelectorAll('button');
+            allBtns.forEach(b => b.style.opacity = '0.7');
+            btn.style.opacity = '1';
+        };
+        resDiv.appendChild(btn);
+    });
+
+    container.appendChild(resDiv);
+}
 // Load Pages
 async function loadHome() {
     showSection('homeSection');
@@ -312,74 +339,72 @@ async function loadEpisode(slug) {
     const data = await fetchData(`episode/${slug}`);
     if (data?.status === 'success' && data.data) {
         const ep = data.data;
-        currentEpisodeData = ep; // Pastikan ini di-set
-        let url = ep.stream_url || (ep.download_urls?.mp4?.urls?.[0]?.url) || '';
-        if (!url) {
-            alert('Link tidak tersedia.');
-            return;
+        currentEpisodeData = ep;
+
+        // Ambil semua link MP4 yang valid
+        let mp4Urls = [];
+        if (ep.download_urls?.mp4?.urls && Array.isArray(ep.download_urls.mp4.urls)) {
+            mp4Urls = ep.download_urls.mp4.urls
+                .filter(u => u.url && u.url.includes('.mp4') && u.resolution)
+                .map(u => ({ url: u.url, resolution: u.resolution }));
         }
 
         showSection('playerSection');
         playerTitle.textContent = ep.episode || 'Episode';
 
-        // Bersihkan kontainer video dan tambah iframe
         const container = videoPlayer.parentElement;
         container.innerHTML = '';
 
-        // Tambahkan tombol BACK di atas video
+        // Tombol Back
         const backButton = document.createElement('button');
         backButton.id = 'playerBackButton';
         backButton.className = 'control-btn';
         backButton.textContent = '← Kembali ke Detail';
         backButton.style.marginBottom = '10px';
-        backButton.onclick = () => {
-            loadAnimeDetail(currentAnimeSlug);
-        };
+        backButton.onclick = () => loadAnimeDetail(currentAnimeSlug);
         container.appendChild(backButton);
 
-        // Buat iframe
-        const iframe = document.createElement('iframe');
-        iframe.src = url;
-        iframe.width = '100%';
-        iframe.height = '400';
-        iframe.style.border = 'none';
-        iframe.allowFullscreen = true;
-        container.appendChild(iframe);
+        if (mp4Urls.length > 0) {
+            // Urutkan resolusi dari tertinggi ke terendah (opsional)
+            mp4Urls.sort((a, b) => {
+                const resA = parseInt(a.resolution) || 0;
+                const resB = parseInt(b.resolution) || 0;
+                return resB - resA;
+            });
 
-        skipBack.style.display = 'none';
-        skipForward.style.display = 'none';
+            // Gunakan resolusi tertinggi sebagai default
+            const defaultUrl = mp4Urls[0].url;
+            videoPlayer.src = defaultUrl;
+            videoPlayer.controls = true;
+            videoPlayer.style.display = 'block';
+            container.appendChild(videoPlayer);
 
-        // Tambahkan navigasi episode
-        const navDiv = document.createElement('div');
-        navDiv.id = 'episodeNav';
-        navDiv.style.display = 'flex';
-        navDiv.style.gap = '10px';
-        navDiv.style.marginTop = '15px';
+            // Tampilkan tombol skip
+            skipBack.style.display = 'inline-block';
+            skipForward.style.display = 'inline-block';
 
-        // Tombol Sebelumnya
-        if (ep.has_previous_episode && ep.previous_episode?.slug) {
-            const prevBtn = document.createElement('button');
-            prevBtn.className = 'control-btn';
-            prevBtn.textContent = '<< Sebelumnya';
-            prevBtn.onclick = () => {
-                loadEpisode(ep.previous_episode.slug); // Gunakan slug langsung
+            // Tambahkan pemilih resolusi
+            addResolutionSelector(container, mp4Urls);
+
+            // Navigasi episode
+            addEpisodeNavigation(ep);
+        } else {
+            // Fallback: tidak ada MP4 langsung
+            videoPlayer.style.display = 'none';
+            skipBack.style.display = 'none';
+            skipForward.style.display = 'none';
+
+            const openBtn = document.createElement('button');
+            openBtn.id = 'openInNewTab';
+            openBtn.className = 'control-btn';
+            openBtn.textContent = '🎬 Buka Video di Tab Baru';
+            openBtn.onclick = () => {
+                let url = ep.stream_url || (ep.download_urls?.mp4?.urls?.[0]?.url);
+                if (url) window.open(url, '_blank');
             };
-            navDiv.appendChild(prevBtn);
-        }
+            container.appendChild(openBtn);
 
-        // Tombol Berikutnya
-        if (ep.has_next_episode && ep.next_episode?.slug) {
-            const nextBtn = document.createElement('button');
-            nextBtn.className = 'control-btn';
-            nextBtn.textContent = 'Berikutnya >>';
-            nextBtn.onclick = () => {
-                loadEpisode(ep.next_episode.slug); // Gunakan slug langsung
-            };
-            navDiv.appendChild(nextBtn);
-        }
-
-        if (navDiv.children.length > 0) {
-            container.parentNode.insertBefore(navDiv, container.nextSibling);
+            addEpisodeNavigation(ep);
         }
     } else {
         alert('Gagal muat episode.');
